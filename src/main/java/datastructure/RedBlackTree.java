@@ -2,6 +2,7 @@ package datastructure;
 
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Consumer;
 
@@ -22,7 +23,7 @@ public class RedBlackTree<K,V> {
         // TODO: 12/1/2023 Implement
     }
 
-    public Object get(K key) {
+    public Optional<V> search(K key) {
         // TODO: 12/1/2023 Implement
         return null;
     }
@@ -78,7 +79,7 @@ public class RedBlackTree<K,V> {
      */
     static class Node<K,V> {
         protected K key;
-        private V value;
+        protected V value;
 
         protected Node<K,V> parent;
         protected Node<K,V> leftChild;
@@ -92,6 +93,13 @@ public class RedBlackTree<K,V> {
         Node(K key, V value) {
             this.key = key;
             this.value = value;
+        }
+
+        Node(K key, V value, Node<K,V> parent, boolean isBlack) {
+            this.key = key;
+            this.value = value;
+            this.parent = parent;
+            this.isBlack = isBlack;
         }
     }
 
