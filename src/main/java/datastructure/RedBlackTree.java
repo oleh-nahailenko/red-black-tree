@@ -20,7 +20,31 @@ public class RedBlackTree<K,V> {
     }
 
     public void insert(K key, V value) {
-        // TODO: 12/1/2023 Implement
+        Node<K, V> newNode = new Node<>(key, value);
+        Node<K, V> previousNode = this.root;
+        Node<K, V> parent = null;
+
+        // TODO: 12/7/2023 : Can this loop be generalised?
+        while (previousNode != null) {
+            parent = previousNode;
+            if (this.comparator.compare(newNode.key, previousNode.key) < 0) {
+                previousNode = previousNode.leftChild;
+            } else {
+                previousNode = previousNode.rightChild;
+            }
+        }
+
+        newNode.parent = parent;
+        if (parent == null) {
+            this.root = newNode;
+            this.root.isBlack = true;
+        } else if (this.comparator.compare(newNode.key, parent.key) < 0) {
+            parent.leftChild = newNode;
+        } else {
+            parent.rightChild = newNode;
+        }
+
+        // TODO: 12/7/2023 : Fix the tree!
     }
 
     public Optional<V> search(K key) {
