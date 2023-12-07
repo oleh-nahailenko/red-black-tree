@@ -81,6 +81,24 @@ public class RedBlackTreeTest {
     }
 
     @Test
+    void insert_treeIsEmpty_newNodeIsAddedAsRoot() {
+        //GIVEN
+        var tree = new RedBlackTree<>(Integer::compareTo);
+        Integer expectedRootKey = 10;
+        Object expectedRootValue = new Object();
+
+        //WHEN
+        tree.insert(expectedRootKey, expectedRootValue);
+
+        //THEN
+        var actualRoot = tree.root;
+        assertThat(actualRoot).isNotNull();
+        assertThat(actualRoot.key).isEqualTo(expectedRootKey);
+        assertThat(actualRoot.value).isEqualTo(expectedRootValue);
+        assertThat(actualRoot.isBlack).isTrue();
+    }
+
+    @Test
     void insert_newNodeAdded_treeIsBalanced() {
         //GIVEN
         var tree = new RedBlackTree<>(Integer::compareTo);
