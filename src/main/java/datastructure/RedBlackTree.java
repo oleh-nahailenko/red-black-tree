@@ -21,16 +21,14 @@ public class RedBlackTree<K,V> {
 
     public void insert(K key, V value) {
         Node<K, V> newNode = new Node<>(key, value);
-        Node<K, V> previousNode = this.root;
+        Node<K, V> currentNode = this.root;
         Node<K, V> parent = null;
-
-        // TODO: 12/7/2023 : Can this loop be generalised?
-        while (previousNode != null) {
-            parent = previousNode;
-            if (this.comparator.compare(newNode.key, previousNode.key) < 0) {
-                previousNode = previousNode.leftChild;
+        while (currentNode != null) {
+            parent = currentNode;
+            if (this.comparator.compare(newNode.key, currentNode.key) < 0) {
+                currentNode = currentNode.leftChild;
             } else {
-                previousNode = previousNode.rightChild;
+                currentNode = currentNode.rightChild;
             }
         }
 
@@ -47,9 +45,26 @@ public class RedBlackTree<K,V> {
         // TODO: 12/7/2023 : Fix the tree!
     }
 
+    /**
+     * Returns the {@code Optional} value associated with the passed key if the association exists in the tree.
+     * @param key search key.
+     * @return {@code Optional} value associated with the key.
+     */
+    // TODO: 12/9/2023 : handle null keys
     public Optional<V> search(K key) {
-        // TODO: 12/1/2023 Implement
-        return null;
+        Node<K, V> currentNode = this.root;
+        while (currentNode != null) {
+            int comparisonResult = this.comparator.compare(currentNode.key, key);
+            if (comparisonResult < 0) {
+                currentNode = currentNode.rightChild;
+            } else if (comparisonResult > 0) {
+                currentNode = currentNode.leftChild;
+            } else {
+                return Optional.of(currentNode.value);
+            }
+        }
+
+        return Optional.empty();
     }
 
     public void delete(K key) {
