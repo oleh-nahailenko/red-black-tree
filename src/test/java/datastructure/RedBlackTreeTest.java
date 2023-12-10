@@ -81,6 +81,58 @@ public class RedBlackTreeTest {
     }
 
     @Test
+    void rotateLeft_passedNodeIsValid_subtreeRotatedToTheLeft() {
+        //GIVEN
+        RedBlackTree<Integer, Object> tree = new RedBlackTree<>(Integer::compareTo);
+        var x = new RedBlackTree.Node<>(10, new Object());
+        var a = new RedBlackTree.Node<>(5, new Object(), x);
+        var y = new RedBlackTree.Node<>(15, new Object(), x);
+        var b = new RedBlackTree.Node<>(13, new Object(), y);
+        var u = new RedBlackTree.Node<>(20, new Object(), y);
+
+        x.leftChild = a;
+        x.rightChild = y;
+        y.leftChild = b;
+        y.rightChild = u;
+
+        //WHEN
+        tree.rotateLeft(x);
+
+        //THEN
+        assertThat(x.parent == y).isTrue();
+        assertThat(x.leftChild == a).isTrue();
+        assertThat(x.rightChild == b).isTrue();
+        assertThat(y.rightChild == u).isTrue();
+        assertThat(y.leftChild == x).isTrue();
+    }
+
+    @Test
+    void rotateRight_passedNodeIsValid_subtreeRotatedToTheRight() {
+        //GIVEN
+        RedBlackTree<Integer, Object> tree = new RedBlackTree<>(Integer::compareTo);
+        var y = new RedBlackTree.Node<>(15, new Object());
+        var u = new RedBlackTree.Node<>(20, new Object(), y);
+        var x = new RedBlackTree.Node<>(10, new Object(), y);
+        var a = new RedBlackTree.Node<>(5, new Object(), x);
+        var b = new RedBlackTree.Node<>(13, new Object(), x);
+
+        y.leftChild = x;
+        y.rightChild = u;
+        x.leftChild = a;
+        x.rightChild = b;
+
+        //WHEN
+        tree.rotateRight(y);
+
+        //THEN
+        assertThat(y.parent == x).isTrue();
+        assertThat(x.leftChild == a).isTrue();
+        assertThat(x.rightChild == y).isTrue();
+        assertThat(y.rightChild == u).isTrue();
+        assertThat(y.leftChild == b).isTrue();
+    }
+
+    @Test
     void insert_treeIsEmpty_newNodeIsAddedAsRoot() {
         //GIVEN
         var tree = new RedBlackTree<>(Integer::compareTo);

@@ -2,6 +2,7 @@ package datastructure;
 
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.function.Consumer;
@@ -19,16 +20,29 @@ public class RedBlackTree<K,V> {
         this.comparator = comparator;
     }
 
+    /**
+     * Inserts the provided key and value into the tree.
+     * If the specified key already exists in the tree, the new value replaces the old one.
+     * @param key key to determine the value.
+     * @param value value to store.
+     * @throws NullPointerException if the provided key is null.
+     */
     public void insert(K key, V value) {
+        Objects.requireNonNull(key, "Cannot save null key");
+
         Node<K, V> newNode = new Node<>(key, value);
         Node<K, V> currentNode = this.root;
         Node<K, V> parent = null;
         while (currentNode != null) {
             parent = currentNode;
-            if (this.comparator.compare(newNode.key, currentNode.key) < 0) {
+            int comparisonResult = this.comparator.compare(newNode.key, currentNode.key);
+            if (comparisonResult < 0) {
                 currentNode = currentNode.leftChild;
-            } else {
+            } else if (comparisonResult > 0) {
                 currentNode = currentNode.rightChild;
+            } else {
+                currentNode.value = newNode.value;
+                return;
             }
         }
 
@@ -42,7 +56,7 @@ public class RedBlackTree<K,V> {
             parent.rightChild = newNode;
         }
 
-        // TODO: 12/7/2023 : Fix the tree!
+        fixAfterInsertion(newNode);
     }
 
     /**
@@ -97,6 +111,7 @@ public class RedBlackTree<K,V> {
      * @return the number of black nodes from the root to the leaf
      *         or -1 if the number of black nodes in both subtrees does not match.
      */
+    // TODO: 12/10/2023 : rewrite without recursion
     protected int findBlackHeight(RedBlackTree.Node<K,V> root) {
         if (root == null)
             return 0;
@@ -109,6 +124,94 @@ public class RedBlackTree<K,V> {
             return -1;
 
         return leftBlackHeight + currentNodeColor;
+    }
+
+    private void fixAfterInsertion(Node<K, V> node) {
+        while (!isNodeBlack(node.parent)) {
+            if (node.parent.equals(node.parent.parent.leftChild)) {
+                Node<K, V> uncleNode = node.parent.parent.rightChild;
+                if (!isNodeBlack(uncleNode)) {
+                    uncleNode.isBlack = true;
+                    node.parent.isBlack = true;
+                    node.parent.parent.isBlack = false;
+                    node = node.parent.parent;
+                } else {
+                    if (node == node.parent.rightChild) {
+                        node = node.parent;
+                        rotateLeft(node);
+                    }
+                    node.parent.isBlack = true;
+                    node.parent.parent.isBlack = false;
+                    rotateRight(node.parent.parent);
+                }
+            } else {
+                Node<K, V> uncleNode = node.parent.parent.leftChild;
+                if (!isNodeBlack(uncleNode)) {
+                    uncleNode.isBlack = true;
+                    node.parent.isBlack = true;
+                    node.parent.parent.isBlack = false;
+                    node = node.parent.parent;
+                } else {
+                    if (node == node.parent.leftChild) {
+                        node = node.parent;
+                        rotateRight(node);
+                    }
+                    node.parent.isBlack = true;
+                    node.parent.parent.isBlack = false;
+                    rotateLeft(node.parent.parent);
+                }
+            }
+        }
+
+        this.root.isBlack = true;
+    }
+
+    protected void rotateLeft(Node<K, V> node) {
+        if (node == null) return;
+
+        Node<K, V> newParent = node.rightChild;
+        node.rightChild = newParent.leftChild;
+        if (newParent.leftChild != null) {
+            newParent.leftChild.parent = node;
+        }
+
+        newParent.parent = node.parent;
+        if (node.parent == null) {
+            this.root = newParent;
+        } else if (node == node.parent.leftChild) {
+            node.parent.leftChild = newParent;
+        } else {
+            node.parent.rightChild = newParent;
+        }
+
+        newParent.leftChild = node;
+        node.parent = newParent;
+    }
+
+    protected void rotateRight(Node<K, V> node) {
+        if (node == null) return;
+
+        Node<K, V> newParent = node.leftChild;
+        node.leftChild = newParent.rightChild;
+        if (newParent.rightChild != null) {
+            newParent.rightChild.parent = node;
+        }
+
+        newParent.parent = node.parent;
+        if (node.parent == null) {
+            this.root = newParent;
+        } else if (node == node.parent.leftChild) {
+            node.parent.leftChild = newParent;
+        } else {
+            node.parent.rightChild = newParent;
+        }
+
+        newParent.rightChild = node;
+        node.parent = newParent;
+    }
+
+    private boolean isNodeBlack(Node<K, V> node) {
+        return node == null || node.isBlack;
     }
 
     /**
@@ -132,6 +235,12 @@ public class RedBlackTree<K,V> {
         Node(K key, V value) {
             this.key = key;
             this.value = value;
+        }
+
+        Node(K key, V value, Node<K,V> parent) {
+            this.key = key;
+            this.value = value;
+            this.parent = parent;
         }
 
         Node(K key, V value, Node<K,V> parent, boolean isBlack) {
