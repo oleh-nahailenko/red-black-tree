@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class RedBlackTreeTest {
 
@@ -83,7 +84,7 @@ public class RedBlackTreeTest {
     @Test
     void rotateLeft_passedNodeIsValid_subtreeRotatedToTheLeft() {
         //GIVEN
-        RedBlackTree<Integer, Object> tree = new RedBlackTree<>(Integer::compareTo);
+        var tree = new RedBlackTree<>(Integer::compareTo);
         var x = new RedBlackTree.Node<>(10, new Object());
         var a = new RedBlackTree.Node<>(5, new Object(), x);
         var y = new RedBlackTree.Node<>(15, new Object(), x);
@@ -109,7 +110,7 @@ public class RedBlackTreeTest {
     @Test
     void rotateRight_passedNodeIsValid_subtreeRotatedToTheRight() {
         //GIVEN
-        RedBlackTree<Integer, Object> tree = new RedBlackTree<>(Integer::compareTo);
+        var tree = new RedBlackTree<>(Integer::compareTo);
         var y = new RedBlackTree.Node<>(15, new Object());
         var u = new RedBlackTree.Node<>(20, new Object(), y);
         var x = new RedBlackTree.Node<>(10, new Object(), y);
@@ -151,43 +152,131 @@ public class RedBlackTreeTest {
     }
 
     @Test
-    void insert_newNodeAdded_treeIsBalanced() {
+    void insert_keyIsNull_throwsNullPointerException() {
         //GIVEN
         var tree = new RedBlackTree<>(Integer::compareTo);
-        var root = new RedBlackTree.Node<>(4, new Object(), null, true);
-        root.rightChild = new RedBlackTree.Node<>(5, new Object(), root, false);
-        root.leftChild = new RedBlackTree.Node<>(2, new Object(), root, false);
-        tree.root = root;
+        tree.root = new RedBlackTree.Node<>(5, new Object(), null, true);
 
         //WHEN
-        tree.insert(10, new Object());
-
-        //THEN
-        assertThatRedBlackTreeContainsKey(tree, 10);
-        assertThatRedBlackTreeHasNoConsecutiveRedNodes(tree);
-        assertThatRedBlackTreeHasSameNumberOfBlackNodes(tree);
+        assertThatThrownBy(() -> tree.insert(null, new Object()))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("Cannot save null key");
     }
 
     @Test
-    void insert_existingKeyAdded_treeIsBalanced() {
+    void insert_insertingNewNode_parentNodeAndUncleNodeChangedTheirColor() {
         //GIVEN
-        Integer existingKey = 5;
+        var tree = new RedBlackTree<>(Integer::compareTo);
+        var root = new RedBlackTree.Node<>(5, new Object(), null, true);
+        var leftRootChild = new RedBlackTree.Node<>(3, new Object(), root, false);
+        var rightRootChild = new RedBlackTree.Node<>(7, new Object(), root, false);
+
+        root.rightChild = rightRootChild;
+        root.leftChild = leftRootChild;
+        tree.root = root;
+
+        //WHEN
+        tree.insert(1, new Object());
+
+        //THEN
+        assertThat(tree.root.key).isEqualTo(5);
+        assertThat(tree.root.isBlack).isTrue();
+
+        assertThat(tree.root.leftChild.key).isEqualTo(3);
+        assertThat(tree.root.leftChild.isBlack).isTrue();
+
+        assertThat(tree.root.leftChild.leftChild.key).isEqualTo(1);
+        assertThat(tree.root.leftChild.leftChild.isBlack).isFalse();
+
+        assertThat(tree.root.rightChild.key).isEqualTo(7);
+        assertThat(tree.root.rightChild.isBlack).isTrue();
+    }
+
+    @Test
+    void insert_insertingNewNode_newNodeAddedAndTreeIsBalanced() {
+        //GIVEN
+        var tree = new RedBlackTree<>(Integer::compareTo);
+
+        var initialRoot = new RedBlackTree.Node<>(11, new Object(), null, true);
+        var leftRootChild = new RedBlackTree.Node<>(2, new Object(), initialRoot, false);
+        var rightRootChild = new RedBlackTree.Node<>(14, new Object(), initialRoot, true);
+        var leftLeftRootChild = new RedBlackTree.Node<>(1, new Object(), leftRootChild, true);
+        var rightLeftRootChild = new RedBlackTree.Node<>(7, new Object(), leftRootChild, true);
+        var rightRightRootChild = new RedBlackTree.Node<>(15, new Object(), rightRootChild, false);
+        var leftRightLeftRootChild = new RedBlackTree.Node<>(5, new Object(), rightLeftRootChild, false);
+        var rightRightLeftRootChild = new RedBlackTree.Node<>(8, new Object(), rightLeftRootChild, false);
+
+        initialRoot.rightChild = rightRootChild;
+        initialRoot.leftChild = leftRootChild;
+
+        rightRootChild.rightChild = rightRightRootChild;
+        leftRootChild.leftChild = leftLeftRootChild;
+        leftRootChild.rightChild = rightLeftRootChild;
+
+        rightLeftRootChild.rightChild = rightRightLeftRootChild;
+        rightLeftRootChild.leftChild = leftRightLeftRootChild;
+
+        tree.root = initialRoot;
+
+        //WHEN
+        tree.insert(4, new Object());
+
+        //THEN
+        assertThat(tree.root.key).isEqualTo(7);
+        assertThat(tree.root.isBlack).isTrue();
+
+        // right subtree
+        assertThat(tree.root.rightChild.key).isEqualTo(11);
+        assertThat(tree.root.rightChild.isBlack).isFalse();
+
+        assertThat(tree.root.rightChild.leftChild.key).isEqualTo(8);
+        assertThat(tree.root.rightChild.leftChild.isBlack).isTrue();
+
+        assertThat(tree.root.rightChild.rightChild.key).isEqualTo(14);
+        assertThat(tree.root.rightChild.rightChild.isBlack).isTrue();
+
+        assertThat(tree.root.rightChild.rightChild.rightChild.key).isEqualTo(15);
+        assertThat(tree.root.rightChild.rightChild.rightChild.isBlack).isFalse();
+
+        // left subtree
+        assertThat(tree.root.leftChild.key).isEqualTo(2);
+        assertThat(tree.root.leftChild.isBlack).isFalse();
+
+        assertThat(tree.root.leftChild.leftChild.key).isEqualTo(1);
+        assertThat(tree.root.leftChild.leftChild.isBlack).isTrue();
+
+        assertThat(tree.root.leftChild.rightChild.key).isEqualTo(5);
+        assertThat(tree.root.leftChild.rightChild.isBlack).isTrue();
+
+        assertThat(tree.root.leftChild.rightChild.leftChild.key).isEqualTo(4);
+        assertThat(tree.root.leftChild.rightChild.leftChild.isBlack).isFalse();
+    }
+
+    @Test
+    void insert_existentKeyAdded_treeStructureHasNotChanged() {
+        //GIVEN
+        Integer existentKey = 5;
         String expectedValue = "new-value";
 
         var tree = new RedBlackTree<Integer, String>(Integer::compareTo);
         var root = new RedBlackTree.Node<>(4, "value", null, true);
-        root.rightChild = new RedBlackTree.Node<>(existingKey, "old-value", root, false);
+        root.rightChild = new RedBlackTree.Node<>(existentKey, "old-value", root, false);
         root.leftChild = new RedBlackTree.Node<>(2, "value", root, false);
         tree.root = root;
 
         //WHEN
-        tree.insert(existingKey, expectedValue);
+        tree.insert(existentKey, expectedValue);
 
         //THEN
-        assertThatRedBlackTreeContainsKey(tree, existingKey);
-        assertThatRedBlackTreeContainsExpectedValueByKey(tree, existingKey, expectedValue);
-        assertThatRedBlackTreeHasNoConsecutiveRedNodes(tree);
-        assertThatRedBlackTreeHasSameNumberOfBlackNodes(tree);
+        assertThat(tree.root.key).isEqualTo(4);
+        assertThat(tree.root.isBlack).isTrue();
+
+        assertThat(tree.root.leftChild.key).isEqualTo(2);
+        assertThat(tree.root.leftChild.isBlack).isFalse();
+
+        assertThat(tree.root.rightChild.key).isEqualTo(existentKey);
+        assertThat(tree.root.rightChild.value).isEqualTo(expectedValue);
+        assertThat(tree.root.rightChild.isBlack).isFalse();
     }
 
     @Test
