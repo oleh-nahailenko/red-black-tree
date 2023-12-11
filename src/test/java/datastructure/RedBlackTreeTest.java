@@ -144,11 +144,10 @@ public class RedBlackTreeTest {
         tree.insert(expectedRootKey, expectedRootValue);
 
         //THEN
-        var actualRoot = tree.root;
-        assertThat(actualRoot).isNotNull();
-        assertThat(actualRoot.key).isEqualTo(expectedRootKey);
-        assertThat(actualRoot.value).isEqualTo(expectedRootValue);
-        assertThat(actualRoot.isBlack).isTrue();
+        assertThatRedBlackTreeContainsKey(tree, expectedRootKey);
+        assertThatRedBlackTreeHasBlackRoot(tree);
+        assertThatRedBlackTreeHasNoConsecutiveRedNodes(tree);
+        assertThatRedBlackTreeHasSameNumberOfBlackNodes(tree);
     }
 
     @Test
@@ -179,17 +178,13 @@ public class RedBlackTreeTest {
         tree.insert(1, new Object());
 
         //THEN
-        assertThat(tree.root.key).isEqualTo(5);
-        assertThat(tree.root.isBlack).isTrue();
-
-        assertThat(tree.root.leftChild.key).isEqualTo(3);
         assertThat(tree.root.leftChild.isBlack).isTrue();
-
-        assertThat(tree.root.leftChild.leftChild.key).isEqualTo(1);
-        assertThat(tree.root.leftChild.leftChild.isBlack).isFalse();
-
-        assertThat(tree.root.rightChild.key).isEqualTo(7);
         assertThat(tree.root.rightChild.isBlack).isTrue();
+
+        assertThatRedBlackTreeContainsKey(tree, 1);
+        assertThatRedBlackTreeHasBlackRoot(tree);
+        assertThatRedBlackTreeHasNoConsecutiveRedNodes(tree);
+        assertThatRedBlackTreeHasSameNumberOfBlackNodes(tree);
     }
 
     @Test
@@ -222,34 +217,10 @@ public class RedBlackTreeTest {
         tree.insert(4, new Object());
 
         //THEN
-        assertThat(tree.root.key).isEqualTo(7);
-        assertThat(tree.root.isBlack).isTrue();
-
-        // right subtree
-        assertThat(tree.root.rightChild.key).isEqualTo(11);
-        assertThat(tree.root.rightChild.isBlack).isFalse();
-
-        assertThat(tree.root.rightChild.leftChild.key).isEqualTo(8);
-        assertThat(tree.root.rightChild.leftChild.isBlack).isTrue();
-
-        assertThat(tree.root.rightChild.rightChild.key).isEqualTo(14);
-        assertThat(tree.root.rightChild.rightChild.isBlack).isTrue();
-
-        assertThat(tree.root.rightChild.rightChild.rightChild.key).isEqualTo(15);
-        assertThat(tree.root.rightChild.rightChild.rightChild.isBlack).isFalse();
-
-        // left subtree
-        assertThat(tree.root.leftChild.key).isEqualTo(2);
-        assertThat(tree.root.leftChild.isBlack).isFalse();
-
-        assertThat(tree.root.leftChild.leftChild.key).isEqualTo(1);
-        assertThat(tree.root.leftChild.leftChild.isBlack).isTrue();
-
-        assertThat(tree.root.leftChild.rightChild.key).isEqualTo(5);
-        assertThat(tree.root.leftChild.rightChild.isBlack).isTrue();
-
-        assertThat(tree.root.leftChild.rightChild.leftChild.key).isEqualTo(4);
-        assertThat(tree.root.leftChild.rightChild.leftChild.isBlack).isFalse();
+        assertThatRedBlackTreeContainsKey(tree, 4);
+        assertThatRedBlackTreeHasBlackRoot(tree);
+        assertThatRedBlackTreeHasNoConsecutiveRedNodes(tree);
+        assertThatRedBlackTreeHasSameNumberOfBlackNodes(tree);
     }
 
     @Test
@@ -345,6 +316,7 @@ public class RedBlackTreeTest {
 
         //THEN
         assertThatRedBlackTreeDoesNotContainKey(tree, keyToDelete);
+        assertThatRedBlackTreeHasBlackRoot(tree);
         assertThatRedBlackTreeHasNoConsecutiveRedNodes(tree);
         assertThatRedBlackTreeHasSameNumberOfBlackNodes(tree);
     }
@@ -364,6 +336,12 @@ public class RedBlackTreeTest {
         //THEN
         assertThatRedBlackTreeHasNoConsecutiveRedNodes(tree);
         assertThatRedBlackTreeHasSameNumberOfBlackNodes(tree);
+    }
+
+    private <K, V> void assertThatRedBlackTreeHasBlackRoot(RedBlackTree<K, V> tree) {
+        assertThat(isBlack(tree.root))
+                .overridingErrorMessage("Tree has RED root")
+                .isTrue();
     }
 
     private <K,V> void assertThatRedBlackTreeHasSameNumberOfBlackNodes(RedBlackTree<K,V> tree) {
