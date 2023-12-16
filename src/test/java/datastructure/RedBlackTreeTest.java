@@ -291,7 +291,38 @@ public class RedBlackTreeTest {
     }
 
     @Test
-    void delete_existingKeyIsRequested_treeDoesNotContainKeyAnaTreeIsBalanced() {
+    void delete_rootIsRequestedToBeDeleted_treeDoesNotContainRequestedNodeAndTreeIsBalanced() {
+        //GIVEN
+        Integer rootKeyToDelete = 3;
+
+        var tree = new RedBlackTree<>(Integer::compareTo);
+        var root = new RedBlackTree.Node<>(rootKeyToDelete, new Object(), null, true);
+        var rightRootChild = new RedBlackTree.Node<>(6, new Object(), root, false);
+        var leftRootChild = new RedBlackTree.Node<>(1, new Object(), root, true);
+
+        var rightRightRootChild = new RedBlackTree.Node<>(8, new Object(), rightRootChild, true);
+        rightRootChild.leftChild = new RedBlackTree.Node<>(5, new Object(), rightRootChild, true);
+        rightRootChild.rightChild = rightRightRootChild;
+
+        rightRightRootChild.rightChild = new RedBlackTree.Node<>(9, new Object(), rightRightRootChild, false);
+        rightRightRootChild.leftChild = new RedBlackTree.Node<>(7, new Object(), rightRightRootChild, false);
+
+        root.leftChild = leftRootChild;
+        root.rightChild = rightRootChild;
+        tree.root = root;
+
+        //WHEN
+        tree.delete(rootKeyToDelete);
+
+        //THEN
+        assertThatRedBlackTreeDoesNotContainKey(tree, rootKeyToDelete);
+        assertThatRedBlackTreeHasBlackRoot(tree);
+        assertThatRedBlackTreeHasNoConsecutiveRedNodes(tree);
+        assertThatRedBlackTreeHasSameNumberOfBlackNodes(tree);
+    }
+
+    @Test
+    void delete_redNodeIsRequestedToBeDeleted_treeDoesNotContainRequestedKeyAndTreeIsBalanced() {
         //GIVEN
         Integer keyToDelete = 6;
 
@@ -306,6 +337,40 @@ public class RedBlackTreeTest {
 
         rightRightRootChild.rightChild = new RedBlackTree.Node<>(9, new Object(), rightRightRootChild, false);
         rightRightRootChild.leftChild = new RedBlackTree.Node<>(7, new Object(), rightRightRootChild, false);
+
+        root.leftChild = leftRootChild;
+        root.rightChild = rightRootChild;
+        tree.root = root;
+
+        //WHEN
+        tree.delete(keyToDelete);
+
+        //THEN
+        assertThatRedBlackTreeDoesNotContainKey(tree, keyToDelete);
+        assertThatRedBlackTreeHasBlackRoot(tree);
+        assertThatRedBlackTreeHasNoConsecutiveRedNodes(tree);
+        assertThatRedBlackTreeHasSameNumberOfBlackNodes(tree);
+    }
+
+    @Test
+    void delete_blackNodeIsRequestedToBeDeleted_treeDoesNotContainRequestedKeyAndTreeIsBalanced() {
+        //GIVEN
+        Integer keyToDelete = 15;
+
+        var tree = new RedBlackTree<>(Integer::compareTo);
+
+        var root = new RedBlackTree.Node<>(10, new Object(), null, true);
+        var rightRootChild = new RedBlackTree.Node<>(20, new Object(), root, true);
+        var leftRootChild = new RedBlackTree.Node<>(5, new Object(), root, true);
+        leftRootChild.leftChild = new RedBlackTree.Node<>(1, new Object(), leftRootChild, true);
+        leftRootChild.rightChild = new RedBlackTree.Node<>(7, new Object(), leftRootChild, true);
+
+        var rightRightRootChild = new RedBlackTree.Node<>(30, new Object(), rightRootChild, false);
+        rightRootChild.leftChild = new RedBlackTree.Node<>(keyToDelete, new Object(), rightRootChild, true);
+        rightRootChild.rightChild = rightRightRootChild;
+
+        rightRightRootChild.rightChild = new RedBlackTree.Node<>(40, new Object(), rightRightRootChild, true);
+        rightRightRootChild.leftChild = new RedBlackTree.Node<>(25, new Object(), rightRightRootChild, true);
 
         root.leftChild = leftRootChild;
         root.rightChild = rightRootChild;
