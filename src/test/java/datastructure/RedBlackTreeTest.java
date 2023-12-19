@@ -322,7 +322,7 @@ public class RedBlackTreeTest {
     }
 
     @Test
-    void delete_redNodeIsRequestedToBeDeleted_treeDoesNotContainRequestedKeyAndTreeIsBalanced() {
+    void delete_redNodeWithoutChildrenIsRequestedToBeDeleted_treeDoesNotContainRequestedKeyAndTreeIsBalanced() {
         //GIVEN
         Integer keyToDelete = 6;
 
@@ -353,7 +353,7 @@ public class RedBlackTreeTest {
     }
 
     @Test
-    void delete_blackNodeIsRequestedToBeDeleted_treeDoesNotContainRequestedKeyAndTreeIsBalanced() {
+    void delete_blackNodeWithoutChildrenIsRequestedToBeDeleted_treeDoesNotContainRequestedKeyAndTreeIsBalanced() {
         //GIVEN
         Integer keyToDelete = 15;
 
@@ -384,6 +384,34 @@ public class RedBlackTreeTest {
         assertThatRedBlackTreeHasBlackRoot(tree);
         assertThatRedBlackTreeHasNoConsecutiveRedNodes(tree);
         assertThatRedBlackTreeHasSameNumberOfBlackNodes(tree);
+    }
+
+    @Test
+    void delete_redNodeWithOneChildIsRequestedToBeDeleted_treeDoesNotContainRequestedKeyAndTreeIsBalanced() {
+        //GIVEN
+        //WHEN
+        //THEN
+    }
+
+    @Test
+    void delete_blackNodeWithOneChildIsRequestedToBeDeleted_treeDoesNotContainRequestedKeyAndTreeIsBalanced() {
+        //GIVEN
+        //WHEN
+        //THEN
+    }
+
+    @Test
+    void delete_redNodeWithChildrenIsRequestedToBeDeleted_treeDoesNotContainRequestedKeyAndTreeIsBalanced() {
+        //GIVEN
+        //WHEN
+        //THEN
+    }
+
+    @Test
+    void delete_blackNodeWithChildrenIsRequestedToBeDeleted_treeDoesNotContainRequestedKeyAndTreeIsBalanced() {
+        //GIVEN
+        //WHEN
+        //THEN
     }
 
     @Test
